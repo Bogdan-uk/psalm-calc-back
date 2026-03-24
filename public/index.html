@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Psalter API Tester</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <style>
+        :root { --pico-font-size: 14px; }
+        pre { background: #f4f4f4; padding: 10px; border-radius: 8px; max-height: 300px; overflow: auto; }
+        .grid-custom { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
+        section { margin-bottom: 40px; border-top: 1px solid #eee; padding-top: 20px; }
+        .status { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <h1>Psalter API Dashboard</h1>
+        
+        <div class="grid">
+            <article>
+                <header>👤 Пользователь</header>
+                <div id="user-info">Не авторизован</div>
+                <button class="secondary" onclick="getMe()">Обновить инфо</button>
+                <button class="outline" onclick="logout()">Выйти</button>
+            </article>
+            <article>
+                <header>🚀 Быстрые действия</header>
+                <button onclick="getMyGroups()">Мои группы</button>
+                <button onclick="getMySchedule()">Мое расписание</button>
+            </article>
+        </div>
+
+        <div class="grid-custom">
+            <!-- Левая колонка: Формы -->
+            <aside>
+                <section id="auth-section">
+                    <h3>Авторизация</h3>
+                    <input type="text" id="reg-name" placeholder="Имя (для рег)">
+                    <input type="email" id="auth-email" placeholder="Email">
+                    <input type="password" id="auth-password" placeholder="Пароль">
+                    <div class="grid">
+                        <button onclick="register()">Регистрация</button>
+                        <button onclick="login()">Вход</button>
+                    </div>
+                </section>
+
+                <section>
+                    <h3>Группы</h3>
+                    <input type="text" id="group-name" placeholder="Название группы">
+                    <textarea id="group-desc" placeholder="Описание"></textarea>
+                    <button onclick="createGroup()">Создать группу</button>
+                </section>
+
+                <section>
+                    <h3>Управление (Admin)</h3>
+                    <input type="text" id="target-group-id" placeholder="Group ID">
+                    <input type="text" id="target-user-id" placeholder="User ID">
+                    <button onclick="addUser()">Добавить в группу</button>
+                    <hr>
+                    <button onclick="autoDistribute()">Авто-распределение</button>
+                </section>
+
+                <section>
+                    <h3>Псалтирь</h3>
+                    <input type="number" id="psalter-id" value="1" min="1" max="20">
+                    <button onclick="getPsalter()">Показать кафизму</button>
+                </section>
+            </aside>
+
+            <!-- Правая колонка: Результат -->
+            <section>
+                <h3>Лог запросов / Ответ сервера</h3>
+                <div id="response-status" class="status">Ожидание...</div>
+                <pre id="response-output">{}</pre>
+            </section>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
