@@ -15,3 +15,17 @@ export const addUserSchema = celebrate({
     })
   })
 });
+
+export const updateNamesSchema = celebrate({
+  [Segments.PARAMS]: Joi.object().keys({
+    groupId: Joi.string().regex(objectIdPattern).required().messages({
+      'string.pattern.base': 'Неверный формат ID группы'
+    })
+  }),
+  [Segments.BODY]: Joi.object().keys({
+    healthNames: Joi.array().items(Joi.string()).optional(),
+    reposeNames: Joi.array().items(Joi.string()).optional(),
+    lostNames: Joi.array().items(Joi.string()).optional(),
+  })
+});
+

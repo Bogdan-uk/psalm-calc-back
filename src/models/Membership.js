@@ -20,10 +20,28 @@ const membershipSchema = new Schema(
       default: "reader",
     },
 
+    sequenceOrder: {
+      type: Number,
+      default: 0,
+    },
+
     joinedAt: {
       type: Date,
       default: Date.now,
     },
+
+    healthNames: {
+      type: [String],
+      default: [],
+    }, // о здравии
+    reposeNames: {
+      type: [String],
+      default: [],
+    }, // о упокоении
+    lostNames: {
+      type: [String],
+      default: [],
+    }, // о заблудших (опционально)
   },
   {
     timestamps: true,

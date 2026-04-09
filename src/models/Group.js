@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Schema, model } from 'mongoose';
 
 const groupSchema = new Schema(
   {
@@ -11,7 +11,28 @@ const groupSchema = new Schema(
 
     createdBy: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
+    },
+
+    isLostListEnabled: {
+      type: Boolean,
+      default: false,
+    },
+
+    rotationType: {
+      type: String,
+      enum: ["sequential", "shift"],
+      default: "sequential",
+    },
+
+    startDate: {
+      type: Date,
+      default: Date.now,
+    },
+
+    totalKathismas: {
+      type: Number,
+      default: 20,
     },
   },
   {
@@ -19,4 +40,4 @@ const groupSchema = new Schema(
   },
 );
 
-export default model("Group", groupSchema);
+export default model('Group', groupSchema);

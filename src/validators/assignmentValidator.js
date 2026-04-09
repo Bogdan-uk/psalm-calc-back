@@ -28,3 +28,19 @@ export const completeAssignmentSchema = celebrate({
     assignmentId: Joi.string().regex(objectIdPattern).required()
   })
 });
+
+export const getTodaySchema = celebrate({
+  [Segments.PARAMS]: Joi.object().keys({
+    groupId: Joi.string().regex(objectIdPattern).required()
+  })
+});
+
+export const getScheduleSchema = celebrate({
+  [Segments.PARAMS]: Joi.object().keys({
+    groupId: Joi.string().regex(objectIdPattern).required()
+  }),
+  [Segments.QUERY]: Joi.object().keys({
+    days: Joi.number().integer().min(1).max(365).optional()
+  })
+});
+

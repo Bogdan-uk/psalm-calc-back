@@ -9,6 +9,7 @@ import groupRoutes from './routes/groupRotes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import assignmentRoutes from './routes/assignmentRoutes.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import setupSwagger from './utils/swagger.js';
 
 import { connectMongoDB } from './db/connectMongoDB.js';
 const app = express();
@@ -19,9 +20,26 @@ const PORT = process.env.PORT || 3000;
 //     credentials: true,
 //   }),
 // );
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        "script-src": ["'self'", "'unsafe-inline'"],
+        "script-src-attr": ["'unsafe-inline'"],
+        "style-src": ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+      },
+    },
+  })
+);
 app.use(express.json());
 app.use(cookieParser()); // Необходим для работы с куками сессий
+
+// Serve static files
+app.use(express.static('public'));
+
+// Swagger documentation
+setupSwagger(app);
 
 // Основные роуты
 app.use('/api/auth', authRoutes);

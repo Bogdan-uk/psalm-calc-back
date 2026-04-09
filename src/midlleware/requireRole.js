@@ -18,8 +18,11 @@ export const requireRole = (role) => {
         return res.status(403).json({ error: 'Вы не являетесь участником этой группы' });
       }
 
-      if (membership.role !== role) {
-        return res.status(403).json({ error: 'У вас недостаточно прав для этого действия' });
+      if (role) {
+        const roles = Array.isArray(role) ? role : [role];
+        if (!roles.includes(membership.role)) {
+          return res.status(403).json({ error: 'У вас недостаточно прав для этого действия' });
+        }
       }
 
       req.membership = membership; // сохраняем членство для дальнейшего использования

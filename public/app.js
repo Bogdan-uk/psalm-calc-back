@@ -8,14 +8,14 @@ const callApi = async (url, method = 'GET', body = null) => {
         const options = {
             method,
             headers: { 'Content-Type': 'application/json' },
-            credentials: 'include' // Important for cookies!
+            credentials: 'include'
         };
         if (body) options.body = JSON.stringify(body);
         
-        const response = await fetch(url, options);
+        const response = await fetch('/api' + url, options);
         const data = await response.json().catch(() => ({}));
         
-        log(`${method} ${url} - ${response.status}`, data);
+        log(`${method} /api${url} - ${response.status}`, data);
         return data;
     } catch (err) {
         log('Error', err.message);
@@ -50,40 +50,104 @@ async function getMe() {
             <strong>${data.name}</strong> (${data.email})<br>
             <small>ID: ${data._id}</small>
         `;
+    } else {
+        document.getElementById('user-info').innerText = 'Не авторизован';
     }
 }
 
 // Groups
 async function getMyGroups() {
-    await callApi('/groups/my');
+    await callApi('/groups');
+}
+
+async function getGroupById() {
+    const id = document.getElementById('group-id-input').value;
+    if (!id) return alert('Введите ID группы');
+    await callApi(`/groups/${id}`);
 }
 
 async function createGroup() {
     const name = document.getElementById('group-name').value;
-    const description = document.getElementById('group-desc').value;
-    await callApi('/groups', 'POST', { name, description });
+    const isLostListEnabled = document.getElementById('group-lost-enabled').checked;
+    const rotationType = document.getElementById('group-rotation').value;
+    const startDate = document.getElementById('group-start-date').value || undefined;
+    await callApi('/groups', 'POST', { name, isLostListEnabled, rotationType, startDate });
 }
 
+async function updateGroup() {
+    const id = document.getElementById('group-id-input').value;
+    if (!id) return alert('Введите ID группы');
+    const name = document.getElementById('group-name').value || undefined;
+    const isLostListEnabled = document.getElementById('group-lost-enabled').checked;
+    const rotationType = document.getElementById('group-rotation').value;
+    const startDate = document.getElementById('group-start-date').value || undefined;
+    await callApi(`/groups/${id}`, 'PATCH', { name, isLostListEnabled, rotationType, startDate });
+}
+
+async function getTodayKathisma() {
+    const id = document.getElementById('group-id-input').value;
+    if (!id) return alert('Введите ID группы');
+    await callApi(`/assignments/${id}/today`);
+}
+
+async function getSchedule() {
+    const id = document.getElementById('group-id-input').value;
+    if (!id) return alert('Введите ID группы');
+    await callApi(`/assignments/${id}/schedule?days=30`);
+}
+
+async function getFullSchedule() {
+    const id = document.getElementById('group-id-input').value;
+    if (!id) return alert('Введите ID группы');
+    await callApi(`/assignments/${id}/debug-full-schedule?days=7`);
+}
+
+// Names
+async function getGroupNames() {
+    const id = document.getElementById('group-id-input').value;
+    if (!id) return alert('Введите ID группы');
+    await callApi(`/groups/${id}/names`);
+}
+
+async function getMyNamesInGroup() {
+    const id = document.getElementById('group-id-input').value;
+    if (!id) return alert('Введите ID группы');
+    const data = await callApi(`/groups/${id}/my-names`);
+    if (data) {
+        document.getElementById('my-health-names').value = (data.healthNames || []).join(', ');
+        document.getElementById('my-repose-names').value = (data.reposeNames || []).join(', ');
+        document.getElementById('my-lost-names').value = (data.lostNames || []).join(', ');
+    }
+}
+
+async function updateMyNames() {
+    const id = document.getElementById('group-id-input').value;
+    if (!id) return alert('Введите ID группы');
+    
+    const healthNames = document.getElementById('my-health-names').value.split(',').map(s => s.trim()).filter(s => s);
+    const reposeNames = document.getElementById('my-repose-names').value.split(',').map(s => s.trim()).filter(s => s);
+    const lostNames = document.getElementById('my-lost-names').value.split(',').map(s => s.trim()).filter(s => s);
+    
+    await callApi(`/groups/${id}/my-names`, 'PATCH', { healthNames, reposeNames, lostNames });
+}
+
+// Admin
 async function addUser() {
-    const groupId = document.getElementById('target-group-id').value;
+    const groupId = document.getElementById('group-id-input').value;
     const userId = document.getElementById('target-user-id').value;
-    await callApi(`/groups/${groupId}/add-user`, 'POST', { userId });
+    if (!groupId || !userId) return alert('Нужны ID группы и ID пользователя');
+    await callApi(`/groups/${groupId}/admin/add-user`, 'POST', { userId });
 }
 
-// Schedule
-async function getMySchedule() {
-    await callApi('/schedule/my');
+async function getGroupMembers() {
+    const groupId = document.getElementById('group-id-input').value;
+    if (!groupId) return alert('Введите ID группы');
+    await callApi(`/groups/${groupId}/admin/members`);
 }
 
-async function autoDistribute() {
-    const groupId = document.getElementById('target-group-id').value;
-    await callApi('/schedule/auto-distribute', 'POST', { groupId });
-}
-
-// Psalter
-async function getPsalter() {
-    const id = document.getElementById('psalter-id').value;
-    await callApi(`/psalter/${id}?lang=ru`);
+// Assignments
+async function getAssignments() {
+    await callApi('/assignments');
 }
 
 // Init

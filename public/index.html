@@ -7,36 +7,42 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
     <style>
         :root { --pico-font-size: 14px; }
-        pre { background: #f4f4f4; padding: 10px; border-radius: 8px; max-height: 300px; overflow: auto; }
-        .grid-custom { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
-        section { margin-bottom: 40px; border-top: 1px solid #eee; padding-top: 20px; }
-        .status { font-weight: bold; }
+        pre { background: #1e1e1e; color: #d4d4d4; padding: 10px; border-radius: 8px; max-height: 400px; overflow: auto; font-family: 'Consolas', monospace; }
+        .grid-custom { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; }
+        section { margin-bottom: 30px; border: 1px solid #eee; padding: 15px; border-radius: 8px; }
+        .status { font-weight: bold; margin-bottom: 5px; }
+        .log-container { position: sticky; top: 20px; }
+        button { margin-bottom: 10px; }
+        input, textarea, select { margin-bottom: 10px; }
+        h3 { margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 5px; }
     </style>
 </head>
 <body>
-    <main class="container">
+    <main class="container-fluid">
         <h1>Psalter API Dashboard</h1>
         
         <div class="grid">
             <article>
                 <header>👤 Пользователь</header>
-                <div id="user-info">Не авторизован</div>
-                <button class="secondary" onclick="getMe()">Обновить инфо</button>
-                <button class="outline" onclick="logout()">Выйти</button>
+                <div id="user-info">Загрузка...</div>
+                <div class="grid" style="margin-top: 10px;">
+                    <button class="secondary" onclick="getMe()">Обновить</button>
+                    <button class="outline" onclick="logout()">Выйти</button>
+                </div>
             </article>
             <article>
-                <header>🚀 Быстрые действия</header>
+                <header>📋 Основные списки</header>
                 <button onclick="getMyGroups()">Мои группы</button>
-                <button onclick="getMySchedule()">Мое расписание</button>
+                <button onclick="getAssignments()">Мои кафизмы</button>
             </article>
         </div>
 
         <div class="grid-custom">
             <!-- Левая колонка: Формы -->
             <aside>
-                <section id="auth-section">
-                    <h3>Авторизация</h3>
-                    <input type="text" id="reg-name" placeholder="Имя (для рег)">
+                <section>
+                    <h3>🔐 Авторизация</h3>
+                    <input type="text" id="reg-name" placeholder="Имя (для регистрации)">
                     <input type="email" id="auth-email" placeholder="Email">
                     <input type="password" id="auth-password" placeholder="Пароль">
                     <div class="grid">
@@ -46,34 +52,64 @@
                 </section>
 
                 <section>
-                    <h3>Группы</h3>
+                    <h3>📁 Группы</h3>
                     <input type="text" id="group-name" placeholder="Название группы">
-                    <textarea id="group-desc" placeholder="Описание"></textarea>
+                    <label>
+                        <input type="checkbox" id="group-lost-enabled"> Включить "О заблудших"
+                    </label>
+                    <select id="group-rotation">
+                        <option value="sequential">Последовательное (+1 кафизма)</option>
+                        <option value="shift">Со сдвигом (по алгоритму)</option>
+                    </select>
+                    <input type="date" id="group-start-date" title="Дата начала">
                     <button onclick="createGroup()">Создать группу</button>
-                </section>
-
-                <section>
-                    <h3>Управление (Admin)</h3>
-                    <input type="text" id="target-group-id" placeholder="Group ID">
-                    <input type="text" id="target-user-id" placeholder="User ID">
-                    <button onclick="addUser()">Добавить в группу</button>
                     <hr>
-                    <button onclick="autoDistribute()">Авто-распределение</button>
+                    <input type="text" id="group-id-input" placeholder="ID Группы для действий ниже">
+                    <button class="contrast" onclick="getGroupById()">Инфо о группе</button>
+                    <button class="contrast" onclick="updateGroup()">Обновить группу (Admin)</button>
+                    <div class="grid">
+                        <button class="primary" onclick="getTodayKathisma()">📖 ЧТО ЧИТАТЬ СЕГОДНЯ?</button>
+                        <button class="secondary" onclick="getSchedule()">📅 РАСПИСАНИЕ НА 30 ДНЕЙ</button>
+                    </div>
+                    <button class="outline" onclick="getFullSchedule()">🧪 DEBUG: РАСПИСАНИЕ ВСЕЙ ГРУППЫ</button>
                 </section>
 
                 <section>
-                    <h3>Псалтирь</h3>
-                    <input type="number" id="psalter-id" value="1" min="1" max="20">
-                    <button onclick="getPsalter()">Показать кафизму</button>
+                    <h3>📝 Имена в группе</h3>
+                    <p><small>Используйте ID группы выше</small></p>
+                    <button onclick="getGroupNames()">Все имена группы (агрегированные)</button>
+                    <button onclick="getMyNamesInGroup()">Мои имена в группе</button>
+                    <hr>
+                    <h5>Обновить мои имена:</h5>
+                    <textarea id="my-health-names" placeholder="О здравии (через запятую)"></textarea>
+                    <textarea id="my-repose-names" placeholder="О упокоении (через запятую)"></textarea>
+                    <textarea id="my-lost-names" placeholder="О заблудших (через запятую)"></textarea>
+                    <button onclick="updateMyNames()">Сохранить мои имена</button>
+                </section>
+
+                <section>
+                    <h3>👥 Участники (Admin)</h3>
+                    <input type="text" id="target-user-id" placeholder="User ID">
+                    <button onclick="addUser()">Добавить юзера в группу</button>
+                    <button onclick="getGroupMembers()">Список участников</button>
                 </section>
             </aside>
 
             <!-- Правая колонка: Результат -->
-            <section>
-                <h3>Лог запросов / Ответ сервера</h3>
-                <div id="response-status" class="status">Ожидание...</div>
-                <pre id="response-output">{}</pre>
-            </section>
+            <div class="log-container">
+                <section>
+                    <h3>📡 Результат запроса</h3>
+                    <div id="response-status" class="status">Ожидание...</div>
+                    <pre id="response-output">{}</pre>
+                </section>
+                
+                <section>
+                    <h3>💡 Подсказка</h3>
+                    <p>Все запросы отправляются с <code>credentials: 'include'</code> для поддержки сессионных кук.</p>
+                    <p>API Base: <code>/api</code></p>
+                    <p><a href="/api-docs" target="_blank">Открыть Swagger UI</a></p>
+                </section>
+            </div>
         </div>
     </main>
 
