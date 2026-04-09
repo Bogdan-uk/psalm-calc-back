@@ -1,6 +1,10 @@
+.env
+.env.local
+node_modules
 .vscode
 .DS_Store
 .idea
+.cursor
 
 # Logs
 logs
