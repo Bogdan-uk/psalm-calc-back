@@ -14,11 +14,14 @@ import setupSwagger from './utils/swagger.js';
 import { connectMongoDB } from './db/connectMongoDB.js';
 const app = express();
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000 || 3001 || 3002;
 app.use(
   cors({
     origin:
-      process.env.PORT || 'http://localhost:3000' || 'http://localhost:3001',
+      process.env.CORS_ORIGIN ||
+      'http://localhost:3000' ||
+      'http://localhost:3001' ||
+      'http://localhost:3002',
     credentials: true,
   }),
 );
